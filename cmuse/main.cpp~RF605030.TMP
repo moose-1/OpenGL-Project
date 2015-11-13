@@ -1,0 +1,152 @@
+#include <stdio.h>
+#include <Windows.h>
+#include "GL\gl.h"
+#include "glut.h"
+#include <cmath>
+
+// klawisze: true, jezeli 
+bool keys[256], specialkeys[256];
+
+
+GLdouble fi = 1.0;
+GLdouble teta = 1.0;
+
+void initOpenGL(){
+	glClearColor(1.0f, 1.0f, 1.0f, 0.0f);
+}
+
+void handleKeys(){
+	if(keys[27])
+			exit(0);
+
+	if(specialKeys[GLUT_KEY_UP]){
+		fi += 0.1;
+	}
+	if(specialKeys[GLUT_KEY_DOWN]){
+		fi -= 0.1;
+	}
+	if(specialKeys[GLUT_KEY_RIGHT]){
+		teta += 0.1;
+	}
+	if(specialKeys[GLUT_KEY_LEFT]){
+		teta -= 0.1;
+	}
+
+}
+
+void drawScene(){
+	handleKeys();
+	glClear(GL_COLOR_BUFFER_BIT);	
+	glLoadIdentity(); // w danym miejscu stosu, dajemy macierz jednostkow¹
+
+
+
+
+	GLdouble r = 10.0;
+	GLdouble x = r * cos(teta) * cos(fi);
+	GLdouble y = r * sin(teta);
+	GLdouble z = r * cos(teta) * sin(fi);
+
+	gluLookAt( x , y, z, 0, 0, 0, 0, 1, 0);
+
+	// rysujemy uklad wspolrzednych
+	 // pocz¹tek definicji krawêdzi szeœcianu
+    glBegin( GL_LINES );
+   
+		// wspó³rzêdne kolejnych krawêdzi szeœcianu
+		// os x: dodatnia czesc
+		glColor3f( 1.0, 0.0, 0.0 ); glVertex3f( 0.0, 0.0, 0.0 );glVertex3f( 1.0, 0.0, 0.0 );
+		// os y: dodatnia czesc
+		glColor3f( 0.0, 1.0, 0.0 ); glVertex3f( 0.0, 1.0, 0.0 ); glVertex3f( 0.0, 0.0, 0.0 );
+		// os z: dodatnia czesc
+		glColor3f( 0.0, 0.0, 1.0 ); glVertex3f( 0.0, 0.0, 1.0 );glVertex3f( 0.0, 0.0, 0.0 );
+    // koniec definicji prymitywu
+    glEnd();
+	
+	glEnable(GL_LINE_STIPPLE);
+	glLineStipple(8, 0xAAAA);
+	
+	// pocz¹tek definicji krawêdzi szeœcianu
+    glBegin( GL_LINES );
+   		// ujemne czesci linia przerywana		
+		// os x: ujemna czesc
+		glColor3f( 1.0, 0.0, 0.0 ); glVertex3f( 0.0, 0.0, 0.0 );glVertex3f( -1.0, 0.0, 0.0 );
+		// os y: ujemna czesc
+		glColor3f( 0.0, 1.0, 0.0 ); glVertex3f( 0.0, -1.0, 0.0 ); glVertex3f( 0.0, 0.0, 0.0 );
+		// os z: ujemna czesc
+		glColor3f( 0.0, 0.0, 1.0 ); glVertex3f( 0.0, 0.0, -1.0 );glVertex3f( 0.0, 0.0, 0.0 );
+		
+    // koniec definicji prymitywu
+    glEnd();
+
+	glDisable(GL_LINE_STIPPLE);
+
+	glutSwapBuffers();
+	glutPostRedisplay();
+}
+
+void keyDown(unsigned char key, int x, int y){
+	keys[key] = true;
+		
+
+}
+
+void keyUp(unsigned char key, int x, int y){
+	keys[key] = false;
+}
+
+
+void specialKeyDown(int key, int x, int y){
+	specialkeys[key] = true;
+
+}
+
+void specialKeyUp(int key, int x, int y){
+	specialkeys[key] = false;
+}
+
+void reshapeScreen(int w, int h){
+	
+	glViewport( 0, 0, (GLsizei) w, (GLsizei) h );
+    // 1)rysujemy poczatek ukladu wspolrzendych
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(45.0f, (GLfloat)w/(GLfloat)h, 0.1f, 100.0f);
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+
+	drawScene();
+	
+}
+
+int main(int argc, char *argv[]){
+	myX = 1.0;
+	myY = 3.0;
+	myZ = 5.0;
+
+	// inicjalizacja openGL
+	glutInit(&argc, argv);
+	glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB);
+	// inicjalizacja rozmiaru okna (width, height)
+	glutInitWindowSize(640,480);
+	// tworzymy okno z tytulem
+	glutCreateWindow("Hello World in OpenGL");
+	// iinicjalizujemy openGL
+	initOpenGL();
+	// wyswietlenie
+	glutDisplayFunc(drawScene);	
+
+	// do³¹czenie funkcji wywo³ywanej przy zmianie rozmiaru okna
+    glutReshapeFunc( reshapeScreen );
+
+	glutKeyboardFunc(keyDown);
+	glutKeyboardUpFunc(keyUp);
+	
+	glutSpecialFunc(specialKeyDown);
+	glutSpecialUpFunc(specialKeyUp);
+
+
+	glutMainLoop();
+
+	return 0;
+}
